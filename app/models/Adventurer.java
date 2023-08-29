@@ -9,7 +9,7 @@ import models.treasuremap.Treasure;
 public class Adventurer {
 
     public enum Orientation { NORTH, SOUTH, EAST, WEST }
-    public enum Movement { A, G, D}
+    public enum Movement { FORWARD, LEFT, RIGHT}
 
 
     private String name;
@@ -37,22 +37,40 @@ public class Adventurer {
 
     public void turnLeft() {
         switch(orientation) {
-            case NORTH  : setOrientation(Orientation.WEST);
-            case SOUTH  : setOrientation(Orientation.EAST);
-            case WEST   : setOrientation(Orientation.SOUTH);
-            case EAST   : setOrientation(Orientation.NORTH);
-            default     : System.err.println("invalid orientation found");
+            case NORTH: 
+                setOrientation(Orientation.WEST);     
+                break;
+            case SOUTH: 
+                setOrientation(Orientation.EAST);     
+                break;
+            case WEST: 
+                setOrientation(Orientation.SOUTH);    
+                break;
+            case EAST: 
+                setOrientation(Orientation.NORTH);    
+                break;
+            default: System.err.println("invalid orientation found after turning left");
         };
+        System.out.println(name + " turns left to the " + orientation);
     }
 
     public void turnRight() {
         switch(orientation) {
-            case NORTH  : setOrientation(Orientation.EAST);
-            case SOUTH  : setOrientation(Orientation.WEST);
-            case WEST   : setOrientation(Orientation.NORTH);
-            case EAST   : setOrientation(Orientation.SOUTH);
-            default     : System.err.println("invalid orientation found");
+            case NORTH: 
+                setOrientation(Orientation.EAST);
+                break;
+            case SOUTH: 
+                setOrientation(Orientation.WEST);
+                break;
+            case WEST: 
+                setOrientation(Orientation.NORTH);
+                break;
+            case EAST: 
+                setOrientation(Orientation.SOUTH);
+                break;
+            default: System.err.println("invalid orientation found after turning right");
         };
+        System.out.println(name + " turns right to the " + orientation);
     }
 
     public void moveForward(TreasureMap treasureMap) {
@@ -80,27 +98,36 @@ public class Adventurer {
                 System.err.println("invalid orientation found");
                 newCoordinates = originalCoordinates;
         };
-        // System.out.println("original coordinates = " + originalCoordinates);
-        // System.out.println("new coordinates = " + newCoordinates);
         
-        // update coordinates if new coordinates are neither outOfBounds nor a mountain 
+        System.out.println(name 
+            + " tries to move forward to the " + orientation 
+            + " from " + originalCoordinates 
+            + " to " + newCoordinates
+        );
+
+        // update if new coordinates neither outOfBounds nor mountain 
         if(!newCoordinates.isOutOfBounds(treasureMap) && !newCoordinates.hasMountain(treasureMap)) {
             setCoordinates(newCoordinates);
-            // check if the adventurer found a new treasure
+            System.out.println(name + " moved succesfully");
+            // check if adventurer found new treasure
             if(newCoordinates != originalCoordinates) {
-                // System.out.println("newCoordinates are confirmed new");
                 Optional<Treasure> maybeTreasure = treasureMap.findTreasureByCoordinates(newCoordinates);
-
                 maybeTreasure.ifPresent( t -> {  
-                    setTreasuresFound(getTreasuresFound() + 1); // update treasuresFound
-                    t.setNbOfTreasures(t.getNbOfTreasures() - 1); // update Treasure's nbOfTreasures
+                    setTreasuresFound(getTreasuresFound() + 1); // increase treasuresFound
+                    t.setNbOfTreasures(t.getNbOfTreasures() - 1); // decrease nbOfTreasure
+                    System.out.println(name + " found a treasure !");
+                        System.out.println(
+                            "Treasures left at " + t.getCoordinates() + " : " + t.getNbOfTreasures() 
+                        );
+                    if(!(t.getNbOfTreasures() > 0)) {
+                        treasureMap.deleteTreasure(t); // delete from map if no more treasures here
+                    }
                 });
-
             }
         } else if(newCoordinates.isOutOfBounds(treasureMap)) {
-            System.err.println(this.name+" tries to move OutOfBounds => movement cancelled");
+            System.err.println(name + " tried to move OutOfBounds => movement cancelled");
         } else if(newCoordinates.hasMountain(treasureMap)) {
-            System.err.println(this.name+" tries to move towards a Mountain => movement cancelled");
+            System.err.println(name + " tried to move towards a Mountain => movement cancelled");
         }
     }
 
