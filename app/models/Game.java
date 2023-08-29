@@ -4,25 +4,15 @@ public class Game {
     private TreasureMap treasureMap;
     private Adventurer adventurer; // private Sequence<Adventurer> adventurers
     private int currentRound = 0;
-    private boolean gameOver = false;
 
     public Game(
         TreasureMap treasureMap, 
         Adventurer adventurer, 
-        int currentRound, 
-        boolean gameOver
+        int currentRound
     ) {
         this.treasureMap = treasureMap;
         this.adventurer = adventurer;
         this.currentRound = currentRound;
-        this.gameOver = gameOver;
-    }
-
-
-    // Methods
-
-    public boolean isOver(){
-        return getGameOver();
     }
 
     // Getters/Setters
@@ -49,13 +39,5 @@ public class Game {
 
     public void setCurrentRound(int currentRound) {
         this.currentRound = currentRound;
-    }
-
-    public boolean getGameOver() {
-        return gameOver;
-    }
-
-    public void setGameOver(boolean gameOver) {
-        this.gameOver = gameOver;
     }
 }

@@ -1,6 +1,7 @@
 package models;
 
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
 
@@ -34,10 +35,27 @@ public class TreasureMap {
                 break;
             }
         }
-        if(maybeTreasure.isEmpty()){
-            System.err.println("No treasure found");
-        }
         return maybeTreasure;
+    }
+
+    // to remove a Treasure from the Set once its nbOfTreasures reaches 0
+    public void deleteTreasure(Treasure treasure) {
+        if(treasure.getNbOfTreasures() == 0) {
+            Iterator<Treasure> iterator = treasures.iterator();
+            while (iterator.hasNext()) {
+                Treasure t = iterator.next();
+                if (t.equals(treasure)) {
+                    iterator.remove();
+                }
+            }
+            System.out.println(
+                "Treasure object located at " + treasure.getCoordinates() + " deleted from the map."
+            );
+        } else if(treasure.getNbOfTreasures() > 0){
+            System.err.println("ERROR : trying to remove a Treasure whose nbOfTreasures is above 0");
+        } else {
+            System.err.println("ERROR : this Treasure has a negative nbOfTreasures !");
+        }
     }
 
     // Getters/Setters

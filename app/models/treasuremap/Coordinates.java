@@ -33,11 +33,6 @@ public class Coordinates {
         return coordinatesHasMountain;
     }
 
-    public boolean hasTreasure(TreasureMap treasureMap) {
-        return treasureMap.findTreasureByCoordinates(this).isPresent();
-    }
-
-
     // Getters/Setters & overriden java methods
 
     public int getPositionH() {
@@ -58,7 +53,7 @@ public class Coordinates {
 
     @Override
     public String toString() { 
-        return "h:" + this.positionH + " / v:" + this.positionV;
+        return "(h:" + this.positionH + " / v:" + this.positionV + ")";
     }
 
     @Override // allow comparing 2 Coordinates

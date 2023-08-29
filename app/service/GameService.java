@@ -38,60 +38,66 @@ public class GameService {
 
 		TreasureMap treasureMap = new TreasureMap(3, 4, mountains, treasures);
 
-		Coordinates a1FirstCoordinates = new Coordinates(0, 3);
+		Coordinates a1FirstCoordinates = new Coordinates(1, 1);
 		List<Movement> a1Movements = new ArrayList();
-		a1Movements.add(Movement.A);
-		a1Movements.add(Movement.G);
-		a1Movements.add(Movement.A);
+		a1Movements.add(Movement.FORWARD);
+		a1Movements.add(Movement.FORWARD);
+		a1Movements.add(Movement.FORWARD);
+		a1Movements.add(Movement.LEFT);
+		a1Movements.add(Movement.FORWARD);
+		a1Movements.add(Movement.LEFT);
+		a1Movements.add(Movement.FORWARD);
+		a1Movements.add(Movement.RIGHT);
+		a1Movements.add(Movement.FORWARD);
+        a1Movements.add(Movement.LEFT);
+		a1Movements.add(Movement.FORWARD);
+        a1Movements.add(Movement.LEFT);
+		a1Movements.add(Movement.FORWARD);
 
-		Adventurer a1 = new Adventurer("Lara", a1FirstCoordinates, Orientation.SOUTH, a1Movements, 0);
+		Adventurer a1 = new Adventurer("Lara", a1FirstCoordinates, Orientation.NORTH, a1Movements, 0);
 
-		Game game = new Game(treasureMap, a1, 0, false);
+		Game game = new Game(treasureMap, a1, 0);
 		
         System.out.println("--------- BEGINNING ------------------");
+        System.out.println("");
         System.out.println(game.getTreasureMap());
 		System.out.println(game.getAdventurer());
         
 		
         playRounds(game); // play all rounds of the game
-        if(game.isOver()){
-            System.out.println("////////==========////////");
-            System.out.println("======= GAME OVER =======");
-            System.out.println("////////==========////////");
-        } else {
-            System.err.println("ERROR : all rounds ended without a proper Game Over");
-        }
+        System.out.println("--------- GAME OVER ------------------");
+        System.out.println("");
+        System.out.println("END treasureMap infos = " + game.getTreasureMap());
+        System.out.println("");
+		System.out.println("END adventurer infos = " + game.getAdventurer());
+        System.out.println("");
+        System.out.println("--------------------------------------");
 	}
 
-    // play all rounds of the game until the end of the adventurer's movements 
-    // display "GAME OVER" when finished
+    // play all rounds until end of the adventurer's movements 
     public void playRounds(Game game) {
         // calculate expected number of rounds
         int nbOfRounds = game.getAdventurer().getMovements().size();
-        for(int i = 0 ; i < nbOfRounds - 1 ; i++) {
-            System.out.println("///////////////////////////");
-            playRound(game);
-            System.out.println("///// Game Round n°" + i + " /////");
-        }
-        game.setGameOver(true);
-        
+        System.out.println("nbOfRounds = " + nbOfRounds);
+        System.out.println("");
+        for(int round = 0 ; round < nbOfRounds; round++) {
+            playRound(game, round);
+        }    
     }
 
 
     // play the current round of the game
-	public void playRound(Game game) {
-		System.out.println("=====================");
-		
+	public void playRound(Game game, int round) {
+        System.out.println("///// Game Round n°" + round + " /////");
+        
+        game.setCurrentRound(round); // update game round for potential use elsewhere in code
         moveAdventurer(game.getTreasureMap(), game.getAdventurer(), game.getCurrentRound());
-		
-        System.out.println("ROUND " + game.getCurrentRound() + " ==> ");
-        System.out.println("treasureMap updated = " + game.getTreasureMap());
-		System.out.println("adventurer updated = " + game.getAdventurer());
-		
-        game.setCurrentRound(game.getCurrentRound() + 1);
-		
-        System.out.println("NEXT ROUND = " + game.getCurrentRound());
-		System.out.println("=====================");
+        
+        // System.out.println("");
+        // System.out.println("treasureMap updated infos = " + game.getTreasureMap());
+        // System.out.println("");
+		// System.out.println("adventurer updated infos = " + game.getAdventurer());
+        System.out.println("");
 	}
     
     // move an Adventurer forward, left, or right based on their movement for this round
@@ -102,13 +108,13 @@ public class GameService {
     ) {
         Movement currentMovement = adventurer.getMovements().get(currentRound);
         switch(currentMovement) {
-            case A:
+            case FORWARD:
                 adventurer.moveForward(treasureMap);
                 break;
-            case G:
+            case LEFT:
                 adventurer.turnLeft();
                 break;
-            case D:
+            case RIGHT:
                 adventurer.turnRight();
                 break;
             default:
