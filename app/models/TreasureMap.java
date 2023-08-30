@@ -52,11 +52,21 @@ public class TreasureMap {
                 "Treasure object located at " + treasure.getCoordinates() + " deleted from the map."
             );
         } else if(treasure.getNbOfTreasures() > 0){
-            System.err.println("ERROR : trying to remove a Treasure whose nbOfTreasures is above 0");
+            throw new IllegalArgumentException(
+                "ERROR : trying to remove a Treasure whose nbOfTreasures is above 0"
+            );
         } else {
-            System.err.println("ERROR : this Treasure has a negative nbOfTreasures !");
+            throw new IllegalArgumentException(
+                "ERROR : this Treasure has a negative nbOfTreasures !"
+            );
         }
     }
+
+    public String buildEndResultMapString() {
+        return "C - " + hCells + " - " + vCells;
+    }
+
+    
 
     // Getters/Setters & overriden java methods
 

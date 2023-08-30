@@ -49,7 +49,8 @@ public class Adventurer {
             case EAST: 
                 setOrientation(Orientation.NORTH);    
                 break;
-            default: System.err.println("invalid orientation found after turning left");
+            default: 
+                throw new IllegalArgumentException("invalid orientation found after turning left");
         };
         System.out.println(name + " turns left to the " + orientation);
     }
@@ -68,7 +69,8 @@ public class Adventurer {
             case EAST: 
                 setOrientation(Orientation.SOUTH);
                 break;
-            default: System.err.println("invalid orientation found after turning right");
+            default: 
+                throw new IllegalArgumentException("invalid orientation found after turning right");
         };
         System.out.println(name + " turns right to the " + orientation);
     }
@@ -95,8 +97,7 @@ public class Adventurer {
                 newCoordinates = new Coordinates(positionH + 1, positionV);
                 break;
             default: 
-                System.err.println("invalid orientation found");
-                newCoordinates = originalCoordinates;
+                throw new IllegalArgumentException("invalid orientation found");
         };
         
         System.out.println(name 
@@ -143,6 +144,33 @@ public class Adventurer {
             " tried to move towards coordinates occupied by " + maybeOtherAdventurer.get().name +
             " => movement cancelled");
         }
+    }
+
+    public String buildEndResultString() {
+        String orientationString;
+        switch(orientation) {
+            case NORTH:
+                orientationString = "N";
+                break;
+            case SOUTH:
+                orientationString = "S";
+                break;
+            case EAST:
+                orientationString = "E";
+                break;
+            case WEST:
+                orientationString = "O";
+                break;
+            default: 
+                throw new IllegalArgumentException(
+                    "invalid orientation found when building endResultString"
+                );
+        }
+        return 
+            "A - " + name 
+            + " - " + coordinates.getPositionH() + " - " + coordinates.getPositionV()
+            + " - " + orientationString 
+            + " - " + treasuresFound;
     }
 
     // Getters/Setters & overriden java methods

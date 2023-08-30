@@ -27,8 +27,9 @@ public class Game {
                 Returns an Optional<Integer>
             */
         return maxMovementsSize.orElseGet(() -> {
-            System.err.println("ERROR : no round for this game as no adventurer was found");
-            return -1;
+            throw new IllegalArgumentException(
+                "ERROR : no round for this game as no adventurer was found"
+            );
         });
     }
 
