@@ -33,8 +33,7 @@ public class Adventurer {
         this.treasuresFound = treasuresFound;
     }
 
-
-    // methods
+    // Methods
 
     public void turnLeft() {
         switch(orientation) {
@@ -146,8 +145,7 @@ public class Adventurer {
         }
     }
 
-
-    // Getters/Setters
+    // Getters/Setters & overriden java methods
 
     public String getName() {
         return name;

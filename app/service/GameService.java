@@ -31,12 +31,10 @@ public class GameService {
             add(new Mountain(new Coordinates(2, 1)));
             add(new Mountain(new Coordinates(1, 2)));
         }};
-
         Set<Treasure> treasures = new HashSet<Treasure>(){{
             add(new Treasure(new Coordinates(0, 0), 1));
             add(new Treasure(new Coordinates(1, 0), 3));
         }};
-        
 		TreasureMap treasureMap = new TreasureMap(4, 5, mountains, treasures);
 
         // build Adventurer1
@@ -44,7 +42,10 @@ public class GameService {
 		List<Movement> a1Movements = new ArrayList();
 		a1Movements.add(Movement.FORWARD);
 		a1Movements.add(Movement.FORWARD);
-        
+		a1Movements.add(Movement.LEFT);
+		a1Movements.add(Movement.LEFT);
+		a1Movements.add(Movement.LEFT);
+		a1Movements.add(Movement.LEFT);
 		Adventurer a1 = new Adventurer("Lara", a1FirstCoordinates, Orientation.SOUTH, a1Movements, 0);
 
         // build Adventurer2
@@ -52,7 +53,6 @@ public class GameService {
 		List<Movement> a2Movements = new ArrayList();
         a2Movements.add(Movement.FORWARD);
         a2Movements.add(Movement.FORWARD);
-
    		Adventurer a2 = new Adventurer("Indy", a2FirstCoordinates, Orientation.EAST, a2Movements, 0);
         
         // build Adventurer3
@@ -60,7 +60,6 @@ public class GameService {
 		List<Movement> a3Movements = new ArrayList();
         a3Movements.add(Movement.FORWARD);
         a3Movements.add(Movement.FORWARD);
-
    		Adventurer a3 = new Adventurer("Nathan", a3FirstCoordinates, Orientation.NORTH, a3Movements, 0);
 
         // build List of adventurers
@@ -70,18 +69,18 @@ public class GameService {
         adventurers.add(a3);
 
         // build game
-		Game game = new Game(treasureMap, adventurers, 0);
+		Game game = new Game(treasureMap, adventurers);
 		
         System.out.println("--------- BEGINNING ------------------");
         System.out.println("");
         System.out.println(game.getTreasureMap());
+        
         for(Adventurer a : game.getAdventurers()) {
             System.out.println("> " + a.getName());
             System.out.println(a);
         }
-        
-		
         playRounds(game); // play all rounds of the game
+        
         System.out.println("--------- GAME OVER ------------------");
         System.out.println("");
         System.out.println("END treasureMap infos = " + game.getTreasureMap());
@@ -96,7 +95,6 @@ public class GameService {
     // play all rounds until end of the adventurer's movements 
     public void playRounds(Game game) {
         // calculate expected number of rounds
-        
         int nbOfRounds = game.findMaxMovementsSize(game.getAdventurers());
         System.out.println("nbOfRounds = " + nbOfRounds);
         System.out.println("");
@@ -105,13 +103,10 @@ public class GameService {
         }    
     }
 
-
     // play the current round of the game
 	public void playRound(Game game, int round) {
         System.out.println("///// Game Round n°" + round + " /////");
-        
-        game.setCurrentRound(round); // update game round for potential use elsewhere in code
-        
+                
         List<Adventurer> adventurers = game.getAdventurers();
         for(Adventurer a : adventurers) {
             System.out.println("> " + a.getName());
@@ -119,7 +114,7 @@ public class GameService {
             List<Adventurer> otherAdventurers = new ArrayList<>(adventurers);
             otherAdventurers.remove(a);
             
-            moveAdventurer(game.getTreasureMap(), a, otherAdventurers, game.getCurrentRound());
+            moveAdventurer(game.getTreasureMap(), a, otherAdventurers, round);
             
             System.out.println("");
         }
