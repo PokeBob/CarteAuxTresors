@@ -9,6 +9,17 @@ public class Treasure {
         this.nbOfTreasures = nbOfTreasures;
     }
 
+    // Methods
+
+    public String buildEndResultString() {
+        return 
+            "T - " + coordinates.getPositionH() + " - " + coordinates.getPositionV() 
+            + " - " + nbOfTreasures;
+
+    }
+
+    // Getters/Setters & overriden java methods
+
     public Coordinates getCoordinates() {
         return coordinates;
     }
