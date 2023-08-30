@@ -23,6 +23,18 @@ import models.treasuremap.Treasure;
 @Singleton
 public class GameService {
     
+    // read entry file, process game, and generate exit file
+    public void readFileAndGenerateExitFile(List<String> fileAsStrings) {
+        System.out.println("File fetched in GameService:");
+        for(String line : fileAsStrings) {
+            System.out.println(line);
+        }
+        System.out.println("end of File");
+    }
+
+    // public Game extractGameDataFromFile() {}
+
+
     // launch a test with fixed data
     public void launchTestGame() {
 
