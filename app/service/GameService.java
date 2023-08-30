@@ -25,6 +25,7 @@ public class GameService {
     // launch a test with fixed data
     public void launchTestGame() {
 
+        // build TreasureMap
         Set<Mountain> mountains = new HashSet<Mountain>(){{
             add(new Mountain(new Coordinates(2, 1)));
             add(new Mountain(new Coordinates(1, 2)));
@@ -35,33 +36,48 @@ public class GameService {
             add(new Treasure(new Coordinates(1, 0), 3));
         }};
         
+		TreasureMap treasureMap = new TreasureMap(4, 5, mountains, treasures);
 
-		TreasureMap treasureMap = new TreasureMap(3, 4, mountains, treasures);
-
+        // build Adventurer1
 		Coordinates a1FirstCoordinates = new Coordinates(1, 1);
 		List<Movement> a1Movements = new ArrayList();
 		a1Movements.add(Movement.FORWARD);
-		a1Movements.add(Movement.FORWARD);
-		a1Movements.add(Movement.FORWARD);
 		a1Movements.add(Movement.LEFT);
-		a1Movements.add(Movement.FORWARD);
-		a1Movements.add(Movement.LEFT);
-		a1Movements.add(Movement.FORWARD);
-		a1Movements.add(Movement.RIGHT);
-		a1Movements.add(Movement.FORWARD);
-        a1Movements.add(Movement.LEFT);
-		a1Movements.add(Movement.FORWARD);
-        a1Movements.add(Movement.LEFT);
-		a1Movements.add(Movement.FORWARD);
 
 		Adventurer a1 = new Adventurer("Lara", a1FirstCoordinates, Orientation.NORTH, a1Movements, 0);
 
-		Game game = new Game(treasureMap, a1, 0);
+        // build Adventurer2
+		Coordinates a2FirstCoordinates = new Coordinates(2, 2);
+		List<Movement> a2Movements = new ArrayList();
+        a2Movements.add(Movement.FORWARD);
+        a2Movements.add(Movement.LEFT);
+
+   		Adventurer a2 = new Adventurer("Indy", a2FirstCoordinates, Orientation.EAST, a2Movements, 0);
+        
+        // build Adventurer3
+		Coordinates a3FirstCoordinates = new Coordinates(3, 3);
+		List<Movement> a3Movements = new ArrayList();
+        a3Movements.add(Movement.FORWARD);
+        a3Movements.add(Movement.LEFT);
+
+   		Adventurer a3 = new Adventurer("Nathan", a3FirstCoordinates, Orientation.SOUTH, a3Movements, 0);
+
+        // build List of adventurers
+        List<Adventurer> adventurers = new ArrayList();
+        adventurers.add(a1);
+        adventurers.add(a2);
+        adventurers.add(a3);
+
+        // build game
+		Game game = new Game(treasureMap, adventurers, 0);
 		
         System.out.println("--------- BEGINNING ------------------");
         System.out.println("");
         System.out.println(game.getTreasureMap());
-		System.out.println(game.getAdventurer());
+        for(Adventurer a : game.getAdventurers()) {
+            System.out.println("--- adventurer " + a.getName());
+            System.out.println(a);
+        }
         
 		
         playRounds(game); // play all rounds of the game
@@ -69,7 +85,9 @@ public class GameService {
         System.out.println("");
         System.out.println("END treasureMap infos = " + game.getTreasureMap());
         System.out.println("");
-		System.out.println("END adventurer infos = " + game.getAdventurer());
+        for(Adventurer a : game.getAdventurers()) {
+		    System.out.println("END adventurer " + a.getName() + " infos = " + a);
+        }
         System.out.println("");
         System.out.println("--------------------------------------");
 	}
@@ -77,7 +95,8 @@ public class GameService {
     // play all rounds until end of the adventurer's movements 
     public void playRounds(Game game) {
         // calculate expected number of rounds
-        int nbOfRounds = game.getAdventurer().getMovements().size();
+        
+        int nbOfRounds = game.findMaxMovementsSize(game.getAdventurers());
         System.out.println("nbOfRounds = " + nbOfRounds);
         System.out.println("");
         for(int round = 0 ; round < nbOfRounds; round++) {
@@ -91,13 +110,17 @@ public class GameService {
         System.out.println("///// Game Round n°" + round + " /////");
         
         game.setCurrentRound(round); // update game round for potential use elsewhere in code
-        moveAdventurer(game.getTreasureMap(), game.getAdventurer(), game.getCurrentRound());
+        for(Adventurer a : game.getAdventurers()) {
+            System.out.println("// adventurer " + a.getName());
+            moveAdventurer(game.getTreasureMap(), a, game.getCurrentRound());
+            System.out.println("");
+        }
         
         // System.out.println("");
         // System.out.println("treasureMap updated infos = " + game.getTreasureMap());
         // System.out.println("");
 		// System.out.println("adventurer updated infos = " + game.getAdventurer());
-        System.out.println("");
+        // System.out.println("");
 	}
     
     // move an Adventurer forward, left, or right based on their movement for this round
