@@ -1,5 +1,6 @@
 package models;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,7 +16,7 @@ public class Adventurer {
     private String name;
     private Coordinates coordinates;
     private Orientation orientation;
-    private List<Movement> movements; // ArrayList probably best. Even though we won't touch it once it's filled, we'll need to add chars turned into Movement one by one when reading the file
+    private List<Movement> movements;
     private int treasuresFound = 0;
     
     public Adventurer(
@@ -73,7 +74,7 @@ public class Adventurer {
         System.out.println(name + " turns right to the " + orientation);
     }
 
-    public void moveForward(TreasureMap treasureMap) {
+    public void moveForward(TreasureMap treasureMap, List<Adventurer> otherAdventurers) {
         int positionH = coordinates.getPositionH();
         int positionV = coordinates.getPositionV();
 
@@ -105,10 +106,20 @@ public class Adventurer {
             + " to " + newCoordinates
         );
 
-        // update if new coordinates neither outOfBounds nor mountain 
-        if(!newCoordinates.isOutOfBounds(treasureMap) && !newCoordinates.hasMountain(treasureMap)) {
+        // check if new coordinates:
+        // --> is out of bounds
+        boolean isOutOfBounds = newCoordinates.isOutOfBounds(treasureMap);
+        // --> is a mountain
+        boolean isMountain = newCoordinates.hasMountain(treasureMap);
+        // --> is occupied already by another adventurer
+        Optional<Adventurer> maybeOtherAdventurer = 
+            newCoordinates.findAdventurerByCoordinates(otherAdventurers);
+
+        // update if new coordinates neither outOfBounds nor mountain nor occupied
+        if(!isOutOfBounds && !isMountain && maybeOtherAdventurer.isEmpty()) {
             setCoordinates(newCoordinates);
             System.out.println(name + " moved succesfully");
+            
             // check if adventurer found new treasure
             if(newCoordinates != originalCoordinates) {
                 Optional<Treasure> maybeTreasure = treasureMap.findTreasureByCoordinates(newCoordinates);
@@ -124,10 +135,14 @@ public class Adventurer {
                     }
                 });
             }
-        } else if(newCoordinates.isOutOfBounds(treasureMap)) {
+        } else if(isOutOfBounds) {
             System.err.println(name + " tried to move OutOfBounds => movement cancelled");
-        } else if(newCoordinates.hasMountain(treasureMap)) {
+        } else if(isMountain) {
             System.err.println(name + " tried to move towards a Mountain => movement cancelled");
+        } else if(maybeOtherAdventurer.isPresent()) {
+            System.err.println(name + 
+            " tried to move towards coordinates occupied by " + maybeOtherAdventurer.get().name +
+            " => movement cancelled");
         }
     }
 

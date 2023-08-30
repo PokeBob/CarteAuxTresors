@@ -1,8 +1,11 @@
 package models.treasuremap;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
+import models.Adventurer;
 import models.TreasureMap;
 
 public class Coordinates {
@@ -16,13 +19,15 @@ public class Coordinates {
 
     // methods
 
+    // check if coordinates within the map limits
     public boolean isOutOfBounds(TreasureMap treasureMap) {
        return ( positionH < 0 || positionH > (treasureMap.getHCells() -1) || 
                 positionV < 0 || positionV > (treasureMap.getVCells() -1));
     }
 
+    // check if coordinates a mountain
     public boolean hasMountain(TreasureMap treasureMap) {
-        boolean coordinatesHasMountain   = false;
+        boolean coordinatesHasMountain  = false;
         Set<Mountain> mountains         = treasureMap.getMountains();
         for(Mountain mountain : mountains) {
             if(mountain.getCoordinates().equals(this)){
@@ -31,6 +36,18 @@ public class Coordinates {
             };
         }
         return coordinatesHasMountain;
+    }
+
+    // check if coordinates occupied by an adventurer, if so return them
+    public Optional<Adventurer> findAdventurerByCoordinates(List<Adventurer> adventurers) {
+        Optional<Adventurer> maybeAdventurer = Optional.empty();
+        for(Adventurer a : adventurers) {
+            if(a.getCoordinates().equals(this)){
+                maybeAdventurer = Optional.of(a);
+                break;
+            };
+        }
+        return maybeAdventurer;
     }
 
     // Getters/Setters & overriden java methods
