@@ -145,6 +145,28 @@ public class Adventurer {
         }
     }
 
+    // extract Orientation from string found in entry file
+    public Orientation extractOrientationFromString(String orientationString) {
+        Orientation orientationData;
+        if(orientationString == "N") {
+            orientationData = Orientation.NORTH;
+        } 
+        else if(orientationString == "S") {
+            orientationData = Orientation.SOUTH;
+        } 
+        else if(orientationString == "E") {
+            orientationData = Orientation.EAST;
+        } 
+        else if(orientationString == "O") {
+            orientationData = Orientation.WEST;
+        } else {
+            throw new IllegalArgumentException(
+                "Orientation '" + orientationString + "' found in file does not exist"
+            );
+        }
+        return orientationData;
+    }
+
     // Getters/Setters & overriden java methods
 
     public String getName() {

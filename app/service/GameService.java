@@ -23,66 +23,26 @@ import models.treasuremap.Treasure;
 @Singleton
 public class GameService {
     
-    // read entry file, process game, and generate exit file
-    public void readFileAndGenerateExitFile(List<String> fileAsStrings) {
-        System.out.println("File fetched in GameService:");
-        for(String line : fileAsStrings) {
-            System.out.println(line);
-        }
-        System.out.println("end of File");
+    // launch a test with fixed data mimicking what would be fetched from a file
+    public void launchTestGame() {
+        List<String> entryFileAsStrings = new ArrayList<>();
+        entryFileAsStrings.add("C - 4 - 5");
+        entryFileAsStrings.add("M - 2 - 1");
+        entryFileAsStrings.add("M - 1 - 2");
+        entryFileAsStrings.add("T - 0 - 0 - 1");
+        entryFileAsStrings.add("T - 1 - 0 - 3");
+        entryFileAsStrings.add("A - Lara - 1 - 1 - N - ADAGGAAGADDADA");
+        entryFileAsStrings.add("A - Indiana - 2 - 2 - E - AAGAGADAGAAA");
+        entryFileAsStrings.add("A - Nathan - 3 - 3 - S - GGA");
+
+        readFileAndGenerateExitFile(entryFileAsStrings);
     }
 
-    // public Game extractGameDataFromFile() {}
+    // read entry fileAsStrings, process game, and generate exit file
+    public void readFileAndGenerateExitFile(List<String> fileAsStrings) {
+        // extract Game object from file
+        Game game = extractGameDataFromFile(fileAsStrings);
 
-
-    // launch a test with fixed data
-    public void launchTestGame() {
-
-        // build TreasureMap
-        Set<Mountain> mountains = new HashSet<Mountain>(){{
-            add(new Mountain(new Coordinates(2, 1)));
-            add(new Mountain(new Coordinates(1, 2)));
-        }};
-        Set<Treasure> treasures = new HashSet<Treasure>(){{
-            add(new Treasure(new Coordinates(0, 0), 1));
-            add(new Treasure(new Coordinates(1, 0), 3));
-        }};
-		TreasureMap treasureMap = new TreasureMap(4, 5, mountains, treasures);
-
-        // build Adventurer1
-		Coordinates a1FirstCoordinates = new Coordinates(3, 1);
-		List<Movement> a1Movements = new ArrayList();
-		a1Movements.add(Movement.FORWARD);
-		a1Movements.add(Movement.FORWARD);
-		a1Movements.add(Movement.LEFT);
-		a1Movements.add(Movement.LEFT);
-		a1Movements.add(Movement.LEFT);
-		a1Movements.add(Movement.LEFT);
-		Adventurer a1 = new Adventurer("Lara", a1FirstCoordinates, Orientation.SOUTH, a1Movements, 0);
-
-        // build Adventurer2
-		Coordinates a2FirstCoordinates = new Coordinates(2, 2);
-		List<Movement> a2Movements = new ArrayList();
-        a2Movements.add(Movement.FORWARD);
-        a2Movements.add(Movement.FORWARD);
-   		Adventurer a2 = new Adventurer("Indy", a2FirstCoordinates, Orientation.EAST, a2Movements, 0);
-        
-        // build Adventurer3
-		Coordinates a3FirstCoordinates = new Coordinates(3, 3);
-		List<Movement> a3Movements = new ArrayList();
-        a3Movements.add(Movement.FORWARD);
-        a3Movements.add(Movement.FORWARD);
-   		Adventurer a3 = new Adventurer("Nathan", a3FirstCoordinates, Orientation.NORTH, a3Movements, 0);
-
-        // build List of adventurers
-        List<Adventurer> adventurers = new ArrayList();
-        adventurers.add(a1);
-        adventurers.add(a2);
-        adventurers.add(a3);
-
-        // build game
-		Game game = new Game(treasureMap, adventurers);
-		
         System.out.println("--------- BEGINNING ------------------");
         System.out.println("");
         System.out.println(game.getTreasureMap());
@@ -91,7 +51,9 @@ public class GameService {
             System.out.println("> " + a.getName());
             System.out.println(a);
         }
-        playRounds(game); // play all rounds of the game
+        
+        // play all rounds of the game
+        playRounds(game);
         
         System.out.println("--------- GAME OVER ------------------");
         System.out.println("");
@@ -102,7 +64,41 @@ public class GameService {
         }
         System.out.println("");
         System.out.println("--------------------------------------");
-	}
+
+        // TODO : generate exit file
+    }
+
+    public Game extractGameDataFromFile(List<String> fileAsStrings) {
+        // separate Strings by type
+        List<String> mapStrings         = new ArrayList<>();
+        List<String> mountainsStrings   = new ArrayList<>();
+        List<String> treasuresStrings   = new ArrayList<>();
+        List<String> adventurersStrings = new ArrayList<>();
+
+        for(String s : fileAsStrings) {
+            String cleanString = s.trim();
+            if(cleanString.charAt(0) == 'C') {
+                mapStrings.add(cleanString);
+            }
+            if(cleanString.charAt(0) == 'M') {
+                mountainsStrings.add(cleanString);
+            }
+            if(cleanString.charAt(0) == 'T') {
+                treasuresStrings.add(cleanString);
+            }
+            if(cleanString.charAt(0) == 'A') {
+                adventurersStrings.add(cleanString);
+            }
+        }
+        TreasureMap treasureMap = extractAndBuildTreasureMap(
+            mapStrings, 
+            mountainsStrings,
+            treasuresStrings
+        );
+        List<Adventurer> adventurers    = extractAdventurersFromStrings(adventurersStrings);
+        
+        return new Game(treasureMap, adventurers);
+    }
 
     // play all rounds until end of the adventurer's movements 
     public void playRounds(Game game) {
@@ -161,5 +157,129 @@ public class GameService {
         } else {
             System.out.println(adventurer.getName() + " has no movement for this round");
         }
+    }
+
+
+    /* -- PRIVATE METHODS -- */
+
+    // extract treasureMap data
+    private TreasureMap extractAndBuildTreasureMap(
+        List<String> mapStrings, 
+        List<String> mountainsStrings, 
+        List<String> treasuresStrings
+    ) {
+        // extract mapData
+        int hCells = 0;
+        int vCells = 0;
+        if(mapStrings.size() == 1) {
+            String[] mapInfos   = mapStrings.get(0).split("-");
+            hCells              = Integer.parseInt(mapInfos[1].trim());
+            vCells              = Integer.parseInt(mapInfos[2].trim());
+        } else if(mapStrings.size() > 1) {
+            System.err.println("ERROR : more than one line corresponding to the map found !");
+        } else {
+            System.err.println("ERROR : no line corresponding to the map found !");
+        }
+        // extract other data
+        Set<Mountain> mountains = extractMountainsFromStrings(mountainsStrings);
+        Set<Treasure> treasures = extractTreasuresFromStrings(treasuresStrings);
+
+        return new TreasureMap(hCells, vCells, mountains, treasures);
+    }
+
+    private Set<Mountain> extractMountainsFromStrings(List<String> mountainsStrings) {
+        Set<Mountain> mountains = new HashSet<>();
+        for(String m : mountainsStrings) {
+            Mountain mountain = extractMountainFromString(m);
+            mountains.add(mountain);
+        }
+        return mountains;
+    }
+
+    private Mountain extractMountainFromString(String mountainString) {
+        String[] mountainInfos  = mountainString.split("-");
+        int positionH           = Integer.parseInt(mountainInfos[1].trim());
+        int positionV           = Integer.parseInt(mountainInfos[2].trim());
+        return new Mountain(new Coordinates(positionH, positionV));
+    }
+
+    private Set<Treasure> extractTreasuresFromStrings(List<String> treasuresStrings) {
+        Set<Treasure> treasures = new HashSet<>();
+        for(String t : treasuresStrings) {
+            Treasure treasure = extractTreasureFromString(t);
+            treasures.add(treasure);
+        }
+        return treasures;
+    }
+    
+    private Treasure extractTreasureFromString(String treasureString) {
+        String[] treasureInfos  = treasureString.split("-");
+        int positionH           = Integer.parseInt(treasureInfos[1].trim());
+        int positionV           = Integer.parseInt(treasureInfos[2].trim());
+        int nbOfTreasures       = Integer.parseInt(treasureInfos[3].trim());
+        return new Treasure(new Coordinates(positionH, positionV), nbOfTreasures);
+    }
+
+    private List<Adventurer> extractAdventurersFromStrings(List<String> adventurersStrings) {
+        List<Adventurer> adventurers = new ArrayList<>();
+        for(String a : adventurersStrings) {
+            Adventurer adventurer = extractAdventurerFromString(a);
+            adventurers.add(adventurer);
+        }
+        return adventurers;
+    }
+
+    private Adventurer extractAdventurerFromString(String adventurerString) {
+        String[] adventurerInfos    = adventurerString.split("-");
+        // name
+        String name                 = adventurerInfos[1].trim();
+        // Coordinates
+        int positionH               = Integer.parseInt(adventurerInfos[2].trim());
+        int positionV               = Integer.parseInt(adventurerInfos[3].trim());
+        // Orientation
+        String orientationString    = adventurerInfos[4].trim();
+        Orientation orientation;
+        if(orientationString.equals("N")) {
+            orientation = Orientation.NORTH;
+        } 
+        else if(orientationString.equals("S")) {
+            orientation = Orientation.SOUTH;
+        } 
+        else if(orientationString.equals("E")) {
+            orientation = Orientation.EAST;
+        } 
+        else if(orientationString.equals("O")) {
+            orientation = Orientation.WEST;
+        } else {
+            throw new IllegalArgumentException(
+                "Orientation '" + orientationString + "' found in file does not exist"
+            );
+        }
+        // Movements
+        String movementsString      = adventurerInfos[5].trim();
+        char[] movementsChars       = movementsString.toCharArray();
+        List<Movement> movements    = new ArrayList<>();
+        for(char movement : movementsChars) {
+            if(movement == 'A') {
+                movements.add(Movement.FORWARD);
+            }
+            else if(movement == 'D') {
+                movements.add(Movement.RIGHT);
+            }
+            else if(movement == 'G') {
+                movements.add(Movement.LEFT);
+            } else {
+                throw new IllegalArgumentException(
+                    "Movement '" + movement + "' found in file does not exist"
+                );
+            }
+        }
+        return new Adventurer(
+            name, 
+            new Coordinates(positionH, positionV), 
+            orientation, 
+            movements,
+            0
+        );
     }
 }
