@@ -27,6 +27,7 @@ public class GameService {
     // launch a test with fixed data mimicking what would be fetched from a file
     public void launchTestGame() {
         List<String> entryFileAsStrings = new ArrayList<>();
+        // --\/-- MODIFY HERE FOR ENTRY FILE --\/--
         entryFileAsStrings.add("C - 4 - 5");
         entryFileAsStrings.add("M - 2 - 1");
         entryFileAsStrings.add("M - 1 - 2");
@@ -36,7 +37,7 @@ public class GameService {
         entryFileAsStrings.add("A - Lara - 1 - 1 - N - ADAGGAAGADDADA");
         entryFileAsStrings.add("A - Indiana - 2 - 2 - E - AAGAGADAGAAA");
         entryFileAsStrings.add("A - Nathan - 3 - 3 - S - GGA");
-
+        // --/\-- MODIFY HERE FOR ENTRY FILE --/\--
         readFileAndGenerateExitFile(entryFileAsStrings);
     }
 

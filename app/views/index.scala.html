@@ -4,8 +4,15 @@
   <main style="margin-top: 20px; margin-left: 20px;">
     <h1>Carte aux Trésors</h1>
     <h3>Carbon IT - Alexandre Meyer - 08-2023</h3>
+
+    <p style="margin-top: 50px;">
+      Aller dans app/service/GameService.java à partir de la ligne 30 pour modifier les paramètres d'entrée
+    </p>
+    <p style="margin-top: 50px;">
+      Ré-actualiser la page pour relancer la génération du fichier de sortie dans le terminal
+    </p>
     
-    <p style="margin-top: 50px;">Sélectionnez votre fichier de Carte aux Trésors</p>
+    <!-- <p style="margin-top: 50px;">Sélectionnez votre fichier de Carte aux Trésors</p>
     <p>En cliquant sur "Générer" le fichier d'entrée sera lu</p>
     <p>et générera le fichier de résultat dans le même dossier</p>
     <p>Respectez bien la mise en forme du fichier d'entrée ou aucun fichier de résultat ne sera généré !</p>
@@ -15,38 +22,6 @@
         <input type="file" name="fileInput">
         <button type="submit">Générer</button>
       }
-    </div>
-<!--     <div id="fileData"></div> -->
+    </div> -->
   </main>
 }
-
-<!-- <script>
-  // Javascript code is used purely to display the text content of the file selected
-  document.getElementById('loadFileButton').addEventListener('click', async () => {
-    const fileInput = document.getElementById('fileInput');
-    const file = fileInput.files[0];
-
-    if (file) {
-      const fileContent = await readFile(file); // awaiting result of asynchronous file reading
-      displayFileContent(fileContent); // display text content of the file
-    }
-  });
-
-  // asynchronous reading of the file
-  async function readFile(file) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        resolve(event.target.result);
-      };
-      reader.onerror = reject;
-      reader.readAsText(file);
-    });
-  }
-
-  // display text on the "fileData" div
-  function displayFileContent(content) {
-    const fileDataDiv = document.getElementById('fileData');
-    fileDataDiv.textContent = content;
-  }
-</script> -->
