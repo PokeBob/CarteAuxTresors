@@ -22,7 +22,7 @@ public class TreasureMap {
         this.treasures = treasures;
     }
 
-    // methods
+    // Methods
 
     public Optional<Treasure> findTreasureByCoordinates(Coordinates treasureCoordinates) {
         // System.out.println("looking for Treasure at Coordinates: " + treasureCoordinates);
@@ -58,7 +58,7 @@ public class TreasureMap {
         }
     }
 
-    // Getters/Setters
+    // Getters/Setters & overriden java methods
 
     public int getVCells() {
         return vCells;
