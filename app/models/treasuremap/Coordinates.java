@@ -17,7 +17,7 @@ public class Coordinates {
         this.positionV = positionV;
     }
 
-    // methods
+    // Methods
 
     // check if coordinates within the map limits
     public boolean isOutOfBounds(TreasureMap treasureMap) {

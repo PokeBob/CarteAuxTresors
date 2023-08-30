@@ -6,16 +6,10 @@ import java.util.Optional;
 public class Game {
     private TreasureMap treasureMap;
     private List<Adventurer> adventurers;
-    private int currentRound = 0;
 
-    public Game(
-        TreasureMap treasureMap, 
-        List<Adventurer> adventurers, 
-        int currentRound
-    ) {
+    public Game(TreasureMap treasureMap, List<Adventurer> adventurers) {
         this.treasureMap = treasureMap;
         this.adventurers = adventurers;
-        this.currentRound = currentRound;
     }
 
     // Methods
@@ -54,13 +48,5 @@ public class Game {
 
     public void setAdventurers(List<Adventurer> adventurers) {
         this.adventurers = adventurers;
-    }
-
-    public int getCurrentRound() {
-        return currentRound;
-    }
-
-    public void setCurrentRound(int currentRound) {
-        this.currentRound = currentRound;
     }
 }
