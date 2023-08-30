@@ -95,14 +95,18 @@ public class TreasureMap {
     @Override
     public String toString(){
         String mapSizeString = "mapSize = " + "h:" + getHCells() + " x v:" + getVCells();
-        String mountainsString = " | mountains ";
+        String mountainsString = " | mountains: ";
         for(Mountain mountain : mountains){
             mountainsString += (mountain + " ");
         }
-        String treasuresString = " | treasures ";
-        for(Treasure treasure : treasures){
-            treasuresString += (treasure + " ");
+        String treasuresString = " | treasures: ";
+        if(treasures.size() > 0) {
+            for(Treasure treasure : treasures){
+                treasuresString += (treasure + " ");
+            }
+        } else {
+            treasuresString = " | no treasures on the map";
         }
-        return "TreasureMap : " + mapSizeString + mountainsString + treasuresString;
+        return "TreasureMap: " + mapSizeString + mountainsString + treasuresString;
     }
 }
