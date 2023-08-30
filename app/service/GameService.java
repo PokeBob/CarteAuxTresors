@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Singleton;
@@ -25,6 +26,7 @@ public class GameService {
     // launch a test with fixed data
     public void launchTestGame() {
 
+        // build TreasureMap
         Set<Mountain> mountains = new HashSet<Mountain>(){{
             add(new Mountain(new Coordinates(2, 1)));
             add(new Mountain(new Coordinates(1, 2)));
@@ -35,33 +37,48 @@ public class GameService {
             add(new Treasure(new Coordinates(1, 0), 3));
         }};
         
+		TreasureMap treasureMap = new TreasureMap(4, 5, mountains, treasures);
 
-		TreasureMap treasureMap = new TreasureMap(3, 4, mountains, treasures);
-
-		Coordinates a1FirstCoordinates = new Coordinates(1, 1);
+        // build Adventurer1
+		Coordinates a1FirstCoordinates = new Coordinates(3, 1);
 		List<Movement> a1Movements = new ArrayList();
 		a1Movements.add(Movement.FORWARD);
 		a1Movements.add(Movement.FORWARD);
-		a1Movements.add(Movement.FORWARD);
-		a1Movements.add(Movement.LEFT);
-		a1Movements.add(Movement.FORWARD);
-		a1Movements.add(Movement.LEFT);
-		a1Movements.add(Movement.FORWARD);
-		a1Movements.add(Movement.RIGHT);
-		a1Movements.add(Movement.FORWARD);
-        a1Movements.add(Movement.LEFT);
-		a1Movements.add(Movement.FORWARD);
-        a1Movements.add(Movement.LEFT);
-		a1Movements.add(Movement.FORWARD);
+        
+		Adventurer a1 = new Adventurer("Lara", a1FirstCoordinates, Orientation.SOUTH, a1Movements, 0);
 
-		Adventurer a1 = new Adventurer("Lara", a1FirstCoordinates, Orientation.NORTH, a1Movements, 0);
+        // build Adventurer2
+		Coordinates a2FirstCoordinates = new Coordinates(2, 2);
+		List<Movement> a2Movements = new ArrayList();
+        a2Movements.add(Movement.FORWARD);
+        a2Movements.add(Movement.FORWARD);
 
-		Game game = new Game(treasureMap, a1, 0);
+   		Adventurer a2 = new Adventurer("Indy", a2FirstCoordinates, Orientation.EAST, a2Movements, 0);
+        
+        // build Adventurer3
+		Coordinates a3FirstCoordinates = new Coordinates(3, 3);
+		List<Movement> a3Movements = new ArrayList();
+        a3Movements.add(Movement.FORWARD);
+        a3Movements.add(Movement.FORWARD);
+
+   		Adventurer a3 = new Adventurer("Nathan", a3FirstCoordinates, Orientation.NORTH, a3Movements, 0);
+
+        // build List of adventurers
+        List<Adventurer> adventurers = new ArrayList();
+        adventurers.add(a1);
+        adventurers.add(a2);
+        adventurers.add(a3);
+
+        // build game
+		Game game = new Game(treasureMap, adventurers, 0);
 		
         System.out.println("--------- BEGINNING ------------------");
         System.out.println("");
         System.out.println(game.getTreasureMap());
-		System.out.println(game.getAdventurer());
+        for(Adventurer a : game.getAdventurers()) {
+            System.out.println("> " + a.getName());
+            System.out.println(a);
+        }
         
 		
         playRounds(game); // play all rounds of the game
@@ -69,7 +86,9 @@ public class GameService {
         System.out.println("");
         System.out.println("END treasureMap infos = " + game.getTreasureMap());
         System.out.println("");
-		System.out.println("END adventurer infos = " + game.getAdventurer());
+        for(Adventurer a : game.getAdventurers()) {
+		    System.out.println("END adventurer " + a.getName() + " infos = " + a);
+        }
         System.out.println("");
         System.out.println("--------------------------------------");
 	}
@@ -77,7 +96,8 @@ public class GameService {
     // play all rounds until end of the adventurer's movements 
     public void playRounds(Game game) {
         // calculate expected number of rounds
-        int nbOfRounds = game.getAdventurer().getMovements().size();
+        
+        int nbOfRounds = game.findMaxMovementsSize(game.getAdventurers());
         System.out.println("nbOfRounds = " + nbOfRounds);
         System.out.println("");
         for(int round = 0 ; round < nbOfRounds; round++) {
@@ -91,35 +111,48 @@ public class GameService {
         System.out.println("///// Game Round n°" + round + " /////");
         
         game.setCurrentRound(round); // update game round for potential use elsewhere in code
-        moveAdventurer(game.getTreasureMap(), game.getAdventurer(), game.getCurrentRound());
         
-        // System.out.println("");
-        // System.out.println("treasureMap updated infos = " + game.getTreasureMap());
-        // System.out.println("");
-		// System.out.println("adventurer updated infos = " + game.getAdventurer());
-        System.out.println("");
+        List<Adventurer> adventurers = game.getAdventurers();
+        for(Adventurer a : adventurers) {
+            System.out.println("> " + a.getName());
+            
+            List<Adventurer> otherAdventurers = new ArrayList<>(adventurers);
+            otherAdventurers.remove(a);
+            
+            moveAdventurer(game.getTreasureMap(), a, otherAdventurers, game.getCurrentRound());
+            
+            System.out.println("");
+        }
 	}
     
     // move an Adventurer forward, left, or right based on their movement for this round
-    public Adventurer moveAdventurer(
+    public void moveAdventurer(
         TreasureMap treasureMap,
         Adventurer adventurer, 
-        int currentRound
+        List<Adventurer> otherAdventurers,
+        int round
     ) {
-        Movement currentMovement = adventurer.getMovements().get(currentRound);
-        switch(currentMovement) {
-            case FORWARD:
-                adventurer.moveForward(treasureMap);
-                break;
-            case LEFT:
-                adventurer.turnLeft();
-                break;
-            case RIGHT:
-                adventurer.turnRight();
-                break;
-            default:
-            System.err.println("invalid movement found");
+        Optional<Movement> maybeRoundMovement = Optional.ofNullable(adventurer.getMovements())
+            .flatMap( movements -> 
+                movements.size() > round ? Optional.of(movements.get(round)) : Optional.empty()
+            );
+
+        if(maybeRoundMovement.isPresent()) {
+            switch(maybeRoundMovement.get()) {
+                    case FORWARD:
+                        adventurer.moveForward(treasureMap, otherAdventurers);
+                        break;
+                    case LEFT:
+                        adventurer.turnLeft();
+                        break;
+                    case RIGHT:
+                        adventurer.turnRight();
+                        break;
+                    default:
+                    System.err.println("invalid movement found");
+                }
+        } else {
+            System.out.println(adventurer.getName() + " has no movement for this round");
         }
-        return adventurer;
     }
 }
