@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Singleton;
 
@@ -29,8 +30,9 @@ public class GameService {
         entryFileAsStrings.add("C - 4 - 5");
         entryFileAsStrings.add("M - 2 - 1");
         entryFileAsStrings.add("M - 1 - 2");
-        entryFileAsStrings.add("T - 0 - 0 - 1");
-        entryFileAsStrings.add("T - 1 - 0 - 3");
+        entryFileAsStrings.add("T - 0 - 0 - 2");
+        entryFileAsStrings.add("T - 1 - 0 - 4");
+        entryFileAsStrings.add("T - 1 - 4 - 5");
         entryFileAsStrings.add("A - Lara - 1 - 1 - N - ADAGGAAGADDADA");
         entryFileAsStrings.add("A - Indiana - 2 - 2 - E - AAGAGADAGAAA");
         entryFileAsStrings.add("A - Nathan - 3 - 3 - S - GGA");
@@ -42,33 +44,116 @@ public class GameService {
     public void readFileAndGenerateExitFile(List<String> fileAsStrings) {
         // extract Game object from file
         Game game = extractGameDataFromFile(fileAsStrings);
-
-        System.out.println("--------- BEGINNING ------------------");
-        System.out.println("");
-        System.out.println(game.getTreasureMap());
         
-        for(Adventurer a : game.getAdventurers()) {
-            System.out.println("> " + a.getName());
-            System.out.println(a);
-        }
+        showBeginningLogs(game);
         
         // play all rounds of the game
         playRounds(game);
-        
-        System.out.println("--------- GAME OVER ------------------");
-        System.out.println("");
-        System.out.println("END treasureMap infos = " + game.getTreasureMap());
-        System.out.println("");
-        for(Adventurer a : game.getAdventurers()) {
-		    System.out.println("END adventurer " + a.getName() + " infos = " + a);
-        }
-        System.out.println("");
-        System.out.println("--------------------------------------");
 
-        // TODO : generate exit file
+        showGameOverLogs(game);
+
+        // build end result strings for the exit file
+        List<String> endResultStrings = generateEndResultListOfStrings(game);
+        
+        showFileLogs(fileAsStrings, endResultStrings); // sum up entry & exit files
     }
 
-    public Game extractGameDataFromFile(List<String> fileAsStrings) {
+    private List<String> generateEndResultListOfStrings(Game game) {
+        TreasureMap treasureMap = game.getTreasureMap();
+
+        String mapString = treasureMap.buildEndResultMapString();
+
+        List<String> mountainsStrings = treasureMap.getMountains().stream()
+            .map(m -> m.buildEndResultString())
+            .collect(Collectors.toList());
+
+        List<String> treasuresStrings = treasureMap.getTreasures().stream()
+            .map(m -> m.buildEndResultString())
+            .collect(Collectors.toList());
+        
+        List<String> adventurersStrings = game.getAdventurers().stream()
+            .map(m -> m.buildEndResultString())
+            .collect(Collectors.toList());
+
+        // build final list of Strings
+        List<String> endResult  = new ArrayList<>();
+        endResult.add(mapString);
+        for(String m : mountainsStrings) {
+            endResult.add(m);
+        }
+        for(String t : treasuresStrings) {
+            endResult.add(t);
+        }
+        for(String a : adventurersStrings) {
+            endResult.add(a);
+        }
+
+        return endResult;
+    }    
+
+    // play all rounds until end of the adventurer's movements 
+    private void playRounds(Game game) {
+        // calculate expected number of rounds
+        int nbOfRounds = game.findMaxMovementsSize(game.getAdventurers());
+        System.out.println("nbOfRounds = " + nbOfRounds);
+        System.out.println("");
+        for(int round = 0 ; round < nbOfRounds; round++) {
+            playRound(game, round);
+        }    
+    }
+
+    // play the current round of the game
+	private void playRound(Game game, int round) {
+        System.out.println("///// Game Round n°" + round + " /////");
+                
+        List<Adventurer> adventurers = game.getAdventurers();
+        for(Adventurer a : adventurers) {
+            System.out.println("> " + a.getName());
+            
+            List<Adventurer> otherAdventurers = new ArrayList<>(adventurers);
+            otherAdventurers.remove(a);
+            
+            moveAdventurer(game.getTreasureMap(), a, otherAdventurers, round);
+            
+            System.out.println("");
+        }
+	}
+    
+    // move an Adventurer forward, left, or right based on their movement for this round
+    private void moveAdventurer(
+        TreasureMap treasureMap,
+        Adventurer adventurer, 
+        List<Adventurer> otherAdventurers,
+        int round
+    ) {
+        Optional<Movement> maybeRoundMovement = Optional.ofNullable(adventurer.getMovements())
+            .flatMap( movements -> 
+                movements.size() > round ? Optional.of(movements.get(round)) : Optional.empty()
+            );
+
+        if(maybeRoundMovement.isPresent()) {
+            switch(maybeRoundMovement.get()) {
+                    case FORWARD:
+                        adventurer.moveForward(treasureMap, otherAdventurers);
+                        break;
+                    case LEFT:
+                        adventurer.turnLeft();
+                        break;
+                    case RIGHT:
+                        adventurer.turnRight();
+                        break;
+                    default:
+                        throw new IllegalArgumentException("invalid movement found");
+                }
+        } else {
+            System.out.println(adventurer.getName() + " has no movement for this round");
+        }
+    }
+
+
+    /* -- METHODS TO EXTRACT DATA FROM FILE STRINGS -- */
+
+    private Game extractGameDataFromFile(List<String> fileAsStrings) {
         // separate Strings by type
         List<String> mapStrings         = new ArrayList<>();
         List<String> mountainsStrings   = new ArrayList<>();
@@ -100,68 +185,6 @@ public class GameService {
         return new Game(treasureMap, adventurers);
     }
 
-    // play all rounds until end of the adventurer's movements 
-    public void playRounds(Game game) {
-        // calculate expected number of rounds
-        int nbOfRounds = game.findMaxMovementsSize(game.getAdventurers());
-        System.out.println("nbOfRounds = " + nbOfRounds);
-        System.out.println("");
-        for(int round = 0 ; round < nbOfRounds; round++) {
-            playRound(game, round);
-        }    
-    }
-
-    // play the current round of the game
-	public void playRound(Game game, int round) {
-        System.out.println("///// Game Round n°" + round + " /////");
-                
-        List<Adventurer> adventurers = game.getAdventurers();
-        for(Adventurer a : adventurers) {
-            System.out.println("> " + a.getName());
-            
-            List<Adventurer> otherAdventurers = new ArrayList<>(adventurers);
-            otherAdventurers.remove(a);
-            
-            moveAdventurer(game.getTreasureMap(), a, otherAdventurers, round);
-            
-            System.out.println("");
-        }
-	}
-    
-    // move an Adventurer forward, left, or right based on their movement for this round
-    public void moveAdventurer(
-        TreasureMap treasureMap,
-        Adventurer adventurer, 
-        List<Adventurer> otherAdventurers,
-        int round
-    ) {
-        Optional<Movement> maybeRoundMovement = Optional.ofNullable(adventurer.getMovements())
-            .flatMap( movements -> 
-                movements.size() > round ? Optional.of(movements.get(round)) : Optional.empty()
-            );
-
-        if(maybeRoundMovement.isPresent()) {
-            switch(maybeRoundMovement.get()) {
-                    case FORWARD:
-                        adventurer.moveForward(treasureMap, otherAdventurers);
-                        break;
-                    case LEFT:
-                        adventurer.turnLeft();
-                        break;
-                    case RIGHT:
-                        adventurer.turnRight();
-                        break;
-                    default:
-                    System.err.println("invalid movement found");
-                }
-        } else {
-            System.out.println(adventurer.getName() + " has no movement for this round");
-        }
-    }
-
-
-    /* -- PRIVATE METHODS -- */
-
     // extract treasureMap data
     private TreasureMap extractAndBuildTreasureMap(
         List<String> mapStrings, 
@@ -176,9 +199,13 @@ public class GameService {
             hCells              = Integer.parseInt(mapInfos[1].trim());
             vCells              = Integer.parseInt(mapInfos[2].trim());
         } else if(mapStrings.size() > 1) {
-            System.err.println("ERROR : more than one line corresponding to the map found !");
+            throw new IllegalArgumentException(
+                "ERROR : more than one line corresponding to the map found !"
+            );
         } else {
-            System.err.println("ERROR : no line corresponding to the map found !");
+            throw new IllegalArgumentException(
+                "ERROR : no line corresponding to the map found !"
+            );
         }
         // extract other data
         Set<Mountain> mountains = extractMountainsFromStrings(mountainsStrings);
@@ -281,5 +308,46 @@ public class GameService {
             movements,
             0
         );
+    }
+
+
+    /* -- LOG METHODS (to avoid polluting code) -- */
+
+    private void showBeginningLogs(Game game) {
+        System.out.println("--------- BEGINNING ------------------");
+        System.out.println("");
+        System.out.println(game.getTreasureMap());
+        
+        for(Adventurer a : game.getAdventurers()) {
+            System.out.println("> " + a.getName());
+            System.out.println(a);
+        }
+    }
+
+    private void showGameOverLogs(Game game) {
+        System.out.println("--------- GAME OVER ------------------");
+        System.out.println("");
+        System.out.println("END treasureMap infos = " + game.getTreasureMap());
+        System.out.println("");
+        for(Adventurer a : game.getAdventurers()) {
+		    System.out.println("END adventurer " + a.getName() + " infos = " + a);
+        }
+        System.out.println("");
+        System.out.println("--------------------------------------");
+        System.out.println("");
+    }
+
+    private void showFileLogs(List<String> fileAsStrings, List<String> endResultStrings) {
+        System.out.println("--------- ENTRY FILE ------------------");
+        for(String s : fileAsStrings) {
+		    System.out.println(s);
+        }
+        System.out.println("--------------------------------------");
+        System.out.println("");
+        System.out.println("--------- EXIT FILE ------------------");
+        for(String s : endResultStrings) {
+		    System.out.println(s);
+        }
+        System.out.println("--------------------------------------");
     }
 }

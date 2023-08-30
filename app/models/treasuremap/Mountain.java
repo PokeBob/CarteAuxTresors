@@ -7,6 +7,14 @@ public class Mountain {
         this.coordinates = coordinates;
     }
 
+    // Methods
+
+    public String buildEndResultString() {
+        return "M - " + coordinates.getPositionH() + " - " + coordinates.getPositionV();
+    }
+
+    // Getters/Setters & overriden java methods
+
     public Coordinates getCoordinates() {
         return coordinates;
     }
